@@ -1,7 +1,7 @@
 # Sistema de Matrícula y Gestión Académica
 
 ## Integrante
-John Olivera
+John Anthony Olivera Espinoza
 
 ## Descripción
 Proyecto académico de una aplicación web para gestionar la matrícula
