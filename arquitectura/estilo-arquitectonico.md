@@ -130,5 +130,5 @@ El monolito modular define la estructura global del backend.
 La organización en capas separa sus responsabilidades.
 
 En el siguiente paso se aplicará Clean Architecture para precisar
-las responsabilidades de Dominio, Aplicación, Presentación e
+las responsabilidades de Dominio, Aplicación, Presentación egit
 Infraestructura y controlar las dependencias internas.
