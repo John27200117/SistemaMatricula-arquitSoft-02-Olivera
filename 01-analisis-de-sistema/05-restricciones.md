@@ -14,4 +14,3 @@
 | RC08 | Desarrollo guiado por especificaciones | El desarrollo debe seguir el enfoque SDD solicitado en el curso, documentando el comportamiento esperado antes de implementar las funcionalidades. |
 | RC09 | Pruebas obligatorias | El proyecto debe incluir pruebas unitarias, de integración y de carga, con evidencia de los resultados obtenidos. |
 | RC10 | Matrícula virtual | El flujo propuesto debe permitir presentar documentos, corregir observaciones y obtener la constancia mediante la plataforma, sin introducir pasos presenciales obligatorios. |
-| RC11 | Acceso a servicios externos | La verificación de identidad mediante RENIEC queda condicionada a disponer de acceso autorizado. Si no se obtiene, el prototipo utilizará un servicio simulado identificado como tal. |
