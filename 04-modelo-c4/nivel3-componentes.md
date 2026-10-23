@@ -1,7 +1,7 @@
 # Nivel 3: componentes
 
 > **Proyecto:** Sistema de matrícula y gestión académica para el colegio Mariscal Cáceres, Ayacucho.
-> **Modelo:** C4 · **Contenedor:** Backend/API REST · **Versión:** 1.0 · **Estado:** diseño propuesto.
+> **Modelo:** C4 · **Contenedor:** Backend/API REST · **Versión:** 1.0 · 
 
 ## 1. Objetivo
 

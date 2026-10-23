@@ -1,7 +1,7 @@
 # Nivel 1: contexto del sistema
 
 > **Proyecto:** Sistema de matrícula y gestión académica para el colegio Mariscal Cáceres, Ayacucho.
-> **Modelo:** C4 · **Versión:** 1.0 · **Estado:** propuesta académica, no implementada.
+> **Modelo:** C4 · **Versión:** 1.0 · 
 
 ## 1. Objetivo y alcance
 

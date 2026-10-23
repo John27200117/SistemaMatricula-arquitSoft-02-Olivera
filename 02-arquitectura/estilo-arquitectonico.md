@@ -1,7 +1,7 @@
 # Estilo arquitectónico
 
 > **Proyecto:** Sistema de matrícula y gestión académica para el colegio Mariscal Cáceres, Ayacucho.
-> **Versión:** 1.0 · **Estado:** diseño académico propuesto.
+> **Versión:** 1.0 · 
 
 ## 1. Cliente-servidor con backend monolítico modular
 

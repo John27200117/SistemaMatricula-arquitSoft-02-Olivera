@@ -1,7 +1,7 @@
 # Nivel 4: código
 
 > **Proyecto:** Sistema de matrícula y gestión académica para el colegio Mariscal Cáceres, Ayacucho.
-> **Modelo:** C4 · **Notación:** UML · **Versión:** 1.0 · **Estado:** diseño propuesto, sin código implementado.
+> **Modelo:** C4 · **Notación:** UML · **Versión:** 1.0 · 
 
 ## 1. Propósito y alcance
 

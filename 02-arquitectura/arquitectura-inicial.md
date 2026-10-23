@@ -1,7 +1,7 @@
 # Arquitectura inicial del sistema
 
 > **Proyecto:** Sistema de matrícula y gestión académica para el colegio Mariscal Cáceres, Ayacucho.
-> **Versión:** 1.0 · **Estado:** propuesta académica, no implementada.
+> **Versión:** 1.0 · 
 
 ## 1. Objetivo
 

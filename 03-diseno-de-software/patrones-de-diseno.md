@@ -1,7 +1,7 @@
 # Patrones de diseño
 
 > **Proyecto:** Sistema de matrícula y gestión académica para el colegio Mariscal Cáceres, Ayacucho.
-> **Versión documental:** 1.0 · **Estado:** diseño propuesto, no implementado.
+> **Versión documental:** 1.0 · 
 
 ## 1. Objetivo
 
