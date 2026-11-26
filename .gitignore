@@ -1,0 +1,30 @@
+# Dependencias
+node_modules/
+
+# Variables de entorno y secretos
+.env
+.env.*
+!.env.example
+
+# Archivos generados
+dist/
+coverage/
+build/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Sistema operativo y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Archivos temporales
+*.tmp
+*.temp
+# Documentación auxiliar de herramientas de IA
+backend/.agents/
+backend/.claude/
+backend/.windsurf/

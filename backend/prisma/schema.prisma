@@ -1,0 +1,257 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../generated/prisma"
+  previewFeatures = ["partialIndexes"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Los nombres de entidades y relaciones se conservan del SDD. Los atributos
+// institucionales aún no confirmados se omiten; no son columnas ficticias.
+// Prisma ORM 7 no expresa CHECK constraints en PSL. VACANCY necesita los
+// CHECK(capacity >= 0) y CHECK(occupied_count BETWEEN 0 AND capacity) en una
+// migración SQL antes de aplicar este esquema a una base de datos.
+
+model Role {
+  id          String     @id @default(uuid()) @db.Uuid
+  code        String     @unique(map: "role_code_uq") @db.Text
+  displayName String     @map("display_name") @db.Text
+  userRoles   UserRole[]
+
+  @@map("ROLE")
+}
+
+model UserAccount {
+  id                 String              @id @default(uuid()) @db.Uuid
+  authSubject        String              @unique(map: "user_account_auth_subject_uq") @map("auth_subject") @db.Text
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  userRoles          UserRole[]
+  guardianLinks      GuardianStudent[]   @relation("GuardianAccount")
+  submittedRequests  EnrollmentRequest[] @relation("RequestSubmitter")
+  reviews            RequestReview[]     @relation("ReviewActor")
+  idempotencyRecords IdempotencyRecord[]
+
+  @@map("USER_ACCOUNT")
+}
+
+model UserRole {
+  userId     String      @map("user_id") @db.Uuid
+  roleId     String      @map("role_id") @db.Uuid
+  assignedAt DateTime    @default(now()) @map("assigned_at") @db.Timestamptz(6)
+  user       UserAccount @relation(fields: [userId], references: [id], onDelete: Restrict, map: "user_role_user_fk")
+  role       Role        @relation(fields: [roleId], references: [id], onDelete: Restrict, map: "user_role_role_fk")
+
+  @@id([userId, roleId], map: "user_role_pk")
+  @@map("USER_ROLE")
+}
+
+model Student {
+  id            String              @id @default(uuid()) @db.Uuid
+  createdAt     DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  guardianLinks GuardianStudent[]   @relation("StudentGuardians")
+  requests      EnrollmentRequest[]
+  enrollments   Enrollment[]
+
+  @@map("STUDENT")
+}
+
+model GuardianStudent {
+  guardianUserId String              @map("guardian_user_id") @db.Uuid
+  studentId      String              @map("student_id") @db.Uuid
+  createdAt      DateTime            @default(now()) @map("created_at") @db.Timestamptz(6)
+  guardian       UserAccount         @relation("GuardianAccount", fields: [guardianUserId], references: [id], onDelete: Restrict, map: "guardian_student_guardian_fk")
+  student        Student             @relation("StudentGuardians", fields: [studentId], references: [id], onDelete: Restrict, map: "guardian_student_student_fk")
+  requests       EnrollmentRequest[]
+
+  @@id([guardianUserId, studentId], map: "guardian_student_pk")
+  @@map("GUARDIAN_STUDENT")
+}
+
+model AcademicPeriod {
+  id              String              @id @default(uuid()) @db.Uuid
+  vacancies       Vacancy[]
+  requirementSets RequirementSet[]
+  requests        EnrollmentRequest[]
+  enrollments     Enrollment[]
+
+  @@map("ACADEMIC_PERIOD")
+}
+
+model EnrollmentType {
+  id              String           @id @default(uuid()) @db.Uuid
+  code            String           @unique(map: "enrollment_type_code_uq") @db.Text
+  displayName     String           @map("display_name") @db.Text
+  isActive        Boolean          @map("is_active")
+  requirementSets RequirementSet[]
+
+  @@map("ENROLLMENT_TYPE")
+}
+
+model RequirementSet {
+  id                          String               @id @default(uuid()) @db.Uuid
+  enrollmentTypeId            String               @map("enrollment_type_id") @db.Uuid
+  enrollmentTypeLabelSnapshot String               @map("enrollment_type_label_snapshot") @db.Text
+  academicPeriodId            String               @map("academic_period_id") @db.Uuid
+  versionNo                   Int                  @map("version_no")
+  status                      String               @db.Text
+  createdAt                   DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  publishedAt                 DateTime?            @map("published_at") @db.Timestamptz(6)
+  enrollmentType              EnrollmentType       @relation(fields: [enrollmentTypeId], references: [id], onDelete: Restrict, map: "requirement_set_enrollment_type_fk")
+  academicPeriod              AcademicPeriod       @relation(fields: [academicPeriodId], references: [id], onDelete: Restrict, map: "requirement_set_academic_period_fk")
+  items                       RequirementSetItem[]
+  requests                    EnrollmentRequest[]
+
+  @@unique([enrollmentTypeId, academicPeriodId, versionNo], map: "requirement_set_version_uq")
+  @@unique([id, academicPeriodId], map: "requirement_set_id_period_uq")
+  @@unique([enrollmentTypeId, academicPeriodId], where: { status: "PUBLISHED" }, map: "requirement_set_published_uq")
+  @@map("REQUIREMENT_SET")
+}
+
+model RequirementSetItem {
+  id               String            @id @default(uuid()) @db.Uuid
+  requirementSetId String            @map("requirement_set_id") @db.Uuid
+  name             String            @db.Text
+  description      String?           @db.Text
+  isRequired       Boolean           @map("is_required")
+  displayOrder     Int               @map("display_order")
+  requirementSet   RequirementSet    @relation(fields: [requirementSetId], references: [id], onDelete: Restrict, map: "requirement_set_item_set_fk")
+  documents        RequestDocument[]
+
+  @@unique([id, requirementSetId], map: "requirement_set_item_id_set_uq")
+  @@map("REQUIREMENT_SET_ITEM")
+}
+
+model Grade {
+  id        String    @id @default(uuid()) @db.Uuid
+  sections  Section[]
+  vacancies Vacancy[]
+
+  @@map("GRADE")
+}
+
+model Section {
+  id        String    @id @default(uuid()) @db.Uuid
+  gradeId   String    @map("grade_id") @db.Uuid
+  grade     Grade     @relation(fields: [gradeId], references: [id], onDelete: Restrict, map: "section_grade_fk")
+  vacancies Vacancy[]
+
+  @@unique([id, gradeId], map: "section_id_grade_uq")
+  @@map("SECTION")
+}
+
+model Vacancy {
+  id            String              @id @default(uuid()) @db.Uuid
+  periodId      String              @map("period_id") @db.Uuid
+  gradeId       String              @map("grade_id") @db.Uuid
+  sectionId     String              @map("section_id") @db.Uuid
+  capacity      Int
+  occupiedCount Int                 @default(0) @map("occupied_count")
+  updatedAt     DateTime            @updatedAt @map("updated_at") @db.Timestamptz(6)
+  period        AcademicPeriod      @relation(fields: [periodId], references: [id], onDelete: Restrict, map: "vacancy_period_fk")
+  grade         Grade               @relation(fields: [gradeId], references: [id], onDelete: Restrict, map: "vacancy_grade_fk")
+  section       Section             @relation(fields: [sectionId, gradeId], references: [id, gradeId], onDelete: Restrict, map: "vacancy_section_grade_fk")
+  requests      EnrollmentRequest[]
+  enrollments   Enrollment[]
+
+  @@unique([id, periodId], map: "vacancy_id_period_uq")
+  @@index([periodId, gradeId, sectionId], map: "vacancy_period_grade_section_idx")
+  // UNIQUE(periodId, sectionId) queda pendiente de confirmación institucional.
+  @@map("VACANCY")
+}
+
+model EnrollmentRequest {
+  id                String            @id @default(uuid()) @db.Uuid
+  studentId         String            @map("student_id") @db.Uuid
+  submittedByUserId String            @map("submitted_by_user_id") @db.Uuid
+  vacancyId         String            @map("vacancy_id") @db.Uuid
+  periodId          String            @map("period_id") @db.Uuid
+  requirementSetId  String            @map("requirement_set_id") @db.Uuid
+  status            String            @default("PENDIENTE") @db.Text
+  createdAt         DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  student           Student           @relation(fields: [studentId], references: [id], onDelete: Restrict, map: "enrollment_request_student_fk")
+  submittedBy       UserAccount       @relation("RequestSubmitter", fields: [submittedByUserId], references: [id], onDelete: Restrict, map: "enrollment_request_submitter_fk")
+  guardianStudent   GuardianStudent   @relation(fields: [submittedByUserId, studentId], references: [guardianUserId, studentId], onDelete: Restrict, map: "enrollment_request_guardian_student_fk")
+  academicPeriod    AcademicPeriod    @relation(fields: [periodId], references: [id], onDelete: Restrict, map: "enrollment_request_period_fk")
+  vacancy           Vacancy           @relation(fields: [vacancyId, periodId], references: [id, periodId], onDelete: Restrict, map: "enrollment_request_vacancy_period_fk")
+  requirementSet    RequirementSet    @relation(fields: [requirementSetId, periodId], references: [id, academicPeriodId], onDelete: Restrict, map: "enrollment_request_requirement_set_period_fk")
+  documents         RequestDocument[]
+  reviews           RequestReview[]
+  enrollment        Enrollment?
+
+  @@unique([id, requirementSetId], map: "enrollment_request_id_set_uq")
+  @@unique([id, studentId, periodId], map: "enrollment_request_id_student_period_uq")
+  @@unique([id, studentId, periodId, vacancyId], map: "enrollment_request_id_student_period_vacancy_uq")
+  @@index([studentId, createdAt], map: "enrollment_request_student_created_idx")
+  @@index([status, createdAt], map: "enrollment_request_status_created_idx")
+  @@map("ENROLLMENT_REQUEST")
+}
+
+model RequestDocument {
+  id                   String              @id @default(uuid()) @db.Uuid
+  requestId            String              @map("request_id") @db.Uuid
+  requirementSetId     String              @map("requirement_set_id") @db.Uuid
+  requirementSetItemId String?             @map("requirement_set_item_id") @db.Uuid
+  storageKey           String              @unique(map: "request_document_storage_key_uq") @map("storage_key") @db.Text
+  version              Int
+  uploadedAt           DateTime            @default(now()) @map("uploaded_at") @db.Timestamptz(6)
+  request              EnrollmentRequest   @relation(fields: [requestId, requirementSetId], references: [id, requirementSetId], onDelete: Restrict, map: "request_document_request_set_fk")
+  requirementSetItem   RequirementSetItem? @relation(fields: [requirementSetItemId, requirementSetId], references: [id, requirementSetId], onDelete: Restrict, map: "request_document_item_set_fk")
+
+  @@index([requestId, uploadedAt], map: "request_document_request_uploaded_idx")
+  @@map("REQUEST_DOCUMENT")
+}
+
+model RequestReview {
+  id          String            @id @default(uuid()) @db.Uuid
+  requestId   String            @map("request_id") @db.Uuid
+  actorUserId String            @map("actor_user_id") @db.Uuid
+  action      String            @db.Text
+  comment     String?           @db.Text
+  createdAt   DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  request     EnrollmentRequest @relation(fields: [requestId], references: [id], onDelete: Restrict, map: "request_review_request_fk")
+  actor       UserAccount       @relation("ReviewActor", fields: [actorUserId], references: [id], onDelete: Restrict, map: "request_review_actor_fk")
+
+  @@index([requestId, createdAt], map: "request_review_request_created_idx")
+  @@map("REQUEST_REVIEW")
+}
+
+model Enrollment {
+  id         String            @id @default(uuid()) @db.Uuid
+  requestId  String            @unique(map: "enrollment_request_uq") @map("request_id") @db.Uuid
+  studentId  String            @map("student_id") @db.Uuid
+  periodId   String            @map("period_id") @db.Uuid
+  vacancyId  String            @map("vacancy_id") @db.Uuid
+  approvedAt DateTime          @map("approved_at") @db.Timestamptz(6)
+  request    EnrollmentRequest @relation(fields: [requestId, studentId, periodId, vacancyId], references: [id, studentId, periodId, vacancyId], onDelete: Restrict, map: "enrollment_request_student_period_vacancy_fk")
+  student    Student           @relation(fields: [studentId], references: [id], onDelete: Restrict, map: "enrollment_student_fk")
+  period     AcademicPeriod    @relation(fields: [periodId], references: [id], onDelete: Restrict, map: "enrollment_period_fk")
+  vacancy    Vacancy           @relation(fields: [vacancyId, periodId], references: [id, periodId], onDelete: Restrict, map: "enrollment_vacancy_period_fk")
+
+  @@unique([studentId, periodId], map: "enrollment_student_period_uq")
+  @@unique([requestId, studentId, periodId], map: "enrollment_request_student_period_uq")
+  @@unique([requestId, studentId, periodId, vacancyId], map: "enrollment_request_student_period_vacancy_uq")
+  @@map("ENROLLMENT")
+}
+
+model IdempotencyRecord {
+  id                 String      @id @default(uuid()) @db.Uuid
+  userId             String      @map("user_id") @db.Uuid
+  operationScope     String      @map("operation_scope") @db.Text
+  key                String      @db.Text
+  requestFingerprint String      @map("request_fingerprint") @db.Text
+  processingStatus   String      @map("processing_status") @db.Text
+  responseStatus     Int?        @map("response_status")
+  responseBody       Json?       @map("response_body") @db.JsonB
+  responseReference  String?     @map("response_reference") @db.Text
+  createdAt          DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  expiresAt          DateTime?   @map("expires_at") @db.Timestamptz(6)
+  user               UserAccount @relation(fields: [userId], references: [id], onDelete: Restrict, map: "idempotency_record_user_fk")
+
+  @@unique([userId, operationScope, key], map: "idempotency_record_user_scope_key_uq")
+  @@map("IDEMPOTENCY_RECORD")
+}

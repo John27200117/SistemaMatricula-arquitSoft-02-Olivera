@@ -24,6 +24,11 @@ Los procesos descritos son supuestos de diseño pendientes de validación.
 Arquitectura de tres capas: presentación, lógica de negocio y datos.
 El backend se organizará como un monolito modular.
 
+## Documentación y sprints
+La documentación de Sprint 1 y la especificación del MVP de Sprint 2 están indexadas en [SDD.md](SDD.md). La documentación Sprint 1 está en `sprint-1/`; Sprint 2 está en `sprint-2/`. El código evolutivo se reservará para `frontend/` y `backend/`.
+
+La arquitectura y el stack de Sprint 2 son decisiones previstas para guiar la implementación. No hay todavía una aplicación funcional, endpoints publicados ni resultados de pruebas.
+
 ## Curso
 IS-488 Arquitectura de Software
 
