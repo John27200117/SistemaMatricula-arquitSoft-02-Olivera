@@ -2,7 +2,9 @@
   Body,
   Controller,
   Get,
+  Patch,
   Param,
+  ParseUUIDPipe,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -11,6 +13,7 @@ import {
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
 import { GetEnrollmentTypesUseCase } from '../application/get-enrollment-types.use-case.js';
@@ -21,6 +24,15 @@ import { GetEnrollmentRequestsUseCase } from '../application/get-enrollment-requ
 import { CreateEnrollmentRequestDto } from './dto/create-enrollment-request.dto.js';
 import { AcademicCatalogResponseDto } from './dto/academic-catalog-response.dto.js';
 import { VacancyResponseDto } from './dto/vacancy-response.dto.js';
+import { SectionResponseDto } from './dto/section-response.dto.js';
+import { VacancyAdminResponseDto, VacancyCapacityResponseDto } from './dto/vacancy-admin-response.dto.js';
+import { CreateSectionDto } from './dto/create-section.dto.js';
+import { CreateVacancyDto } from './dto/create-vacancy.dto.js';
+import { UpdateVacancyCapacityDto } from './dto/update-vacancy-capacity.dto.js';
+import { CreateSectionUseCase } from '../application/create-section.use-case.js';
+import { GetSectionsUseCase } from '../application/get-sections.use-case.js';
+import { CreateVacancyUseCase } from '../application/create-vacancy.use-case.js';
+import { UpdateVacancyCapacityUseCase } from '../application/update-vacancy-capacity.use-case.js';
 import { StartReviewUseCase } from '../application/start-review.use-case.js';
 import { ObserveEnrollmentRequestUseCase } from '../application/observe-enrollment-request.use-case.js';
 import { ObserveEnrollmentRequestDto } from './dto/observe-enrollment-request.dto.js';
@@ -44,6 +56,10 @@ export class EnrollmentCatalogController {
     private readonly getEnrollmentTypes: GetEnrollmentTypesUseCase,
     private readonly getAcademicCatalog: GetAcademicCatalogUseCase,
     private readonly getVacancies: GetVacanciesUseCase,
+    private readonly createSection: CreateSectionUseCase,
+    private readonly getSections: GetSectionsUseCase,
+    private readonly createVacancy: CreateVacancyUseCase,
+    private readonly updateVacancyCapacity: UpdateVacancyCapacityUseCase,
     private readonly createEnrollmentRequest: CreateEnrollmentRequestUseCase,
     private readonly getEnrollmentRequests: GetEnrollmentRequestsUseCase,
     private readonly startReview: StartReviewUseCase,
@@ -73,6 +89,50 @@ export class EnrollmentCatalogController {
   @ApiOkResponse({ type: VacancyResponseDto, isArray: true, description: 'Listado de vacantes y cupos disponibles.' })
   getVacanciesList() {
     return this.getVacancies.execute();
+  }
+
+  @Post('sections')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Roles('ADMINISTRADOR')
+  @ApiOperation({ summary: 'Crea una sección asociada a un grado' })
+  @ApiCreatedResponse({ type: SectionResponseDto })
+  createSectionHandler(@Body() dto: CreateSectionDto) {
+    return this.createSection.execute(dto);
+  }
+
+  @Get('sections')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Roles('ADMINISTRADOR')
+  @ApiOperation({ summary: 'Lista secciones con su nivel educativo y grado' })
+  @ApiOkResponse({ type: SectionResponseDto, isArray: true })
+  getSectionsHandler() {
+    return this.getSections.execute();
+  }
+
+  @Post('vacancies')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Roles('ADMINISTRADOR')
+  @ApiOperation({ summary: 'Crea una vacante para un periodo, grado y sección' })
+  @ApiCreatedResponse({ type: VacancyAdminResponseDto })
+  createVacancyHandler(@Body() dto: CreateVacancyDto) {
+    return this.createVacancy.execute(dto);
+  }
+
+  @Patch('vacancies/:id/capacity')
+  @UseGuards(SupabaseAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @Roles('ADMINISTRADOR')
+  @ApiOperation({ summary: 'Actualiza la capacidad de una vacante' })
+  @ApiParam({ name: 'id', description: 'Identificador UUID de la vacante', format: 'uuid' })
+  @ApiOkResponse({ type: VacancyCapacityResponseDto })
+  updateVacancyCapacityHandler(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+    @Body() dto: UpdateVacancyCapacityDto,
+  ) {
+    return this.updateVacancyCapacity.execute(id, dto.capacity);
   }
 
   @Post('enrollment-requests')

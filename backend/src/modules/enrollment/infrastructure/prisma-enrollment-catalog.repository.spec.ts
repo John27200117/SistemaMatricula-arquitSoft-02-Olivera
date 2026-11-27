@@ -1,15 +1,38 @@
 import { jest } from '@jest/globals';
 import { PrismaEnrollmentCatalogRepository } from './prisma-enrollment-catalog.repository.js';
 import type { PrismaService } from '../../../shared/infrastructure/prisma.service.js';
+import type {
+  AcademicPeriodRecord,
+  EducationLevelRecord,
+} from '../domain/enrollment-catalog.repository.js';
+
+type VacancyQueryRecord = {
+  id: string;
+  periodId: string;
+  period: { academicYear: number };
+  gradeId: string;
+  grade: {
+    displayName: string;
+    educationLevelId: string;
+    educationLevel: { displayName: string };
+  };
+  sectionId: string;
+  section: { displayName: string };
+  capacity: number;
+  occupiedCount: number;
+  updatedAt: Date;
+};
 
 describe('PrismaEnrollmentCatalogRepository academic catalog', () => {
   it('returns readable hierarchy and labels for vacancy records', async () => {
     const prisma = {
       academicPeriod: {
-        findMany: jest.fn().mockResolvedValue([{ id: 'period-2027', academicYear: 2027 }]),
+        findMany: jest.fn<() => Promise<AcademicPeriodRecord[]>>().mockResolvedValue([
+          { id: 'period-2027', academicYear: 2027 },
+        ]),
       },
       educationLevel: {
-        findMany: jest.fn().mockResolvedValue([
+        findMany: jest.fn<() => Promise<EducationLevelRecord[]>>().mockResolvedValue([
           {
             id: 'level-primary',
             code: 'PRIMARIA',
@@ -20,7 +43,7 @@ describe('PrismaEnrollmentCatalogRepository academic catalog', () => {
         ]),
       },
       vacancy: {
-        findMany: jest.fn().mockResolvedValue([
+        findMany: jest.fn<() => Promise<VacancyQueryRecord[]>>().mockResolvedValue([
           {
             id: 'vacancy-1',
             periodId: 'period-2027',

@@ -10,9 +10,9 @@ export class VacancyResponseDto {
   @ApiProperty({ example: '1.º grado' }) gradeName!: string;
   @ApiProperty({ format: 'uuid' }) sectionId!: string;
   @ApiProperty({ description: 'Nombre de sección registrado en el catálogo.' }) sectionName!: string;
-  @ApiProperty({ example: 30 }) capacity!: number;
-  @ApiProperty({ example: 12 }) occupiedCount!: number;
-  @ApiProperty({ example: 18 }) availableCount!: number;
-  @ApiProperty({ example: true }) hasAvailability!: boolean;
+  @ApiProperty() capacity!: number;
+  @ApiProperty() occupiedCount!: number;
+  @ApiProperty() availableCount!: number;
+  @ApiProperty() hasAvailability!: boolean;
   @ApiProperty({ type: String, format: 'date-time' }) updatedAt!: Date;
 }

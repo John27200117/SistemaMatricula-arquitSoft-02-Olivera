@@ -1,12 +1,13 @@
 import { jest } from '@jest/globals';
 import { GetAcademicCatalogUseCase } from './get-academic-catalog.use-case.js';
-import {
-  type EnrollmentCatalogRepository,
+import type {
+  AcademicCatalogRecord,
+  EnrollmentCatalogRepository,
 } from '../domain/enrollment-catalog.repository.js';
 
 describe('GetAcademicCatalogUseCase', () => {
   it('returns academic periods and the nested education catalog from the repository', async () => {
-    const catalog = {
+    const catalog: AcademicCatalogRecord = {
       academicPeriods: [{ id: 'period-2027', academicYear: 2027 }],
       educationLevels: [
         {
@@ -25,8 +26,10 @@ describe('GetAcademicCatalogUseCase', () => {
         },
       ],
     };
+    const findAcademicCatalog = jest.fn<EnrollmentCatalogRepository['findAcademicCatalog']>();
+    findAcademicCatalog.mockResolvedValue(catalog);
     const repository = {
-      findAcademicCatalog: jest.fn().mockResolvedValue(catalog),
+      findAcademicCatalog,
     } as unknown as EnrollmentCatalogRepository;
     const useCase = new GetAcademicCatalogUseCase(repository);
 

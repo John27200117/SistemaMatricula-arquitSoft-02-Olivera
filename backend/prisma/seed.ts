@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from '../generated/prisma/client.ts';
+import { PrismaClient } from '../generated/prisma/client.js';
 
 const connectionString = process.env.DATABASE_URL;
 
@@ -22,6 +22,7 @@ const id = {
   newSet: '50000000-0000-4000-8000-000000000001',
   transferSet: '50000000-0000-4000-8000-000000000002',
   grade: '60000000-0000-4000-8000-000000000001',
+  educationLevel: '61000000-0000-4000-8000-000000000001',
   sectionA: '70000000-0000-4000-8000-000000000001',
   sectionB: '70000000-0000-4000-8000-000000000002',
   vacancyA: '80000000-0000-4000-8000-000000000001',
@@ -87,7 +88,7 @@ async function main() {
   await prisma.academicPeriod.upsert({
     where: { id: id.period },
     update: {},
-    create: { id: id.period },
+    create: { id: id.period, academicYear: 2027 },
   });
 
   await prisma.enrollmentType.upsert({
@@ -153,22 +154,38 @@ async function main() {
     where: { id: id.transferSet },
     data: { status: 'PUBLISHED', publishedAt: new Date() },
   });
+  await prisma.educationLevel.upsert({
+    where: { id: id.educationLevel },
+    update: {},
+    create: {
+      id: id.educationLevel,
+      code: 'PRIMARIA',
+      displayName: 'Primaria',
+      sortOrder: 2,
+    },
+  });
+
   await prisma.grade.upsert({
     where: { id: id.grade },
     update: {},
-    create: { id: id.grade },
+    create: {
+      id: id.grade,
+      educationLevelId: id.educationLevel,
+      displayName: '1.º grado',
+      sortOrder: 1,
+    },
   });
 
   await prisma.section.upsert({
     where: { id: id.sectionA },
     update: {},
-    create: { id: id.sectionA, gradeId: id.grade },
+    create: { id: id.sectionA, gradeId: id.grade, displayName: 'A (demo)' },
   });
 
   await prisma.section.upsert({
     where: { id: id.sectionB },
     update: {},
-    create: { id: id.sectionB, gradeId: id.grade },
+    create: { id: id.sectionB, gradeId: id.grade, displayName: 'B (demo)' },
   });
 
   await prisma.vacancy.upsert({

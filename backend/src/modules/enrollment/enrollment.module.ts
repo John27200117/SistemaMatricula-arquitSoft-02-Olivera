@@ -3,6 +3,10 @@ import { PrismaModule } from '../../shared/infrastructure/prisma.module.js';
 
 import { GetEnrollmentTypesUseCase } from './application/get-enrollment-types.use-case.js';
 import { GetAcademicCatalogUseCase } from './application/get-academic-catalog.use-case.js';
+import { CreateSectionUseCase } from './application/create-section.use-case.js';
+import { GetSectionsUseCase } from './application/get-sections.use-case.js';
+import { CreateVacancyUseCase } from './application/create-vacancy.use-case.js';
+import { UpdateVacancyCapacityUseCase } from './application/update-vacancy-capacity.use-case.js';
 import { GetVacanciesUseCase } from './application/get-vacancies.use-case.js';
 import { CreateEnrollmentRequestUseCase } from './application/create-enrollment-request.use-case.js';
 import { GetEnrollmentRequestsUseCase } from './application/get-enrollment-requests.use-case.js';
@@ -32,6 +36,10 @@ import { SupabaseAuthModule } from '../../shared/infrastructure/auth/supabase-au
     },
     GetEnrollmentTypesUseCase,
     GetAcademicCatalogUseCase,
+    CreateSectionUseCase,
+    GetSectionsUseCase,
+    CreateVacancyUseCase,
+    UpdateVacancyCapacityUseCase,
     GetVacanciesUseCase,
     CreateEnrollmentRequestUseCase,
     GetEnrollmentRequestsUseCase,
