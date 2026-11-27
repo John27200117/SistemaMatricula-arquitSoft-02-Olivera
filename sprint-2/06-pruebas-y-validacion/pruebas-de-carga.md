@@ -1,7 +1,7 @@
 # Pruebas de carga — k6
 
 **Objetivo de capacidad confirmado:** evaluar hasta **2.000 usuarios virtuales concurrentes**.  
-**Estado:** escenario diseñado; NO EJECUTADO. No existe prueba ni resultado que demuestre que el sistema alcance el objetivo.
+**Estado:** prueba integral de capacidad hasta 2.000 VUs y escenario de integridad concurrente: PENDIENTES / NO EJECUTADOS. Se realizaron pruebas preliminares de 5, 20 y 50 VUs exclusivamente sobre el endpoint de salud.
 
 ## Qué significa la métrica
 
@@ -40,3 +40,30 @@ Recoger métricas sincronizadas con cada etapa de k6, usando mecanismos previsto
 Sin las métricas del backend/DB/cache no se podrá atribuir degradaciones ni concluir capacidad. No se fijan límites ni se afirma que los mecanismos estén instalados.
 
 Guardar script y salida k6 (resumen, configuración, fecha, versión y recursos) en `../evidencias/03-k6/` sin secretos ni datos reales. Informe final: **PENDIENTE / NO EJECUTADO**.
+
+## Ejecuciones preliminares: endpoint de salud
+
+**Fecha:** 26/11/2026  
+**Herramienta:** k6  
+**Entorno:** ejecución local contra `http://localhost:3000/api/v1/health`  
+**Duración por prueba:** 30 segundos.  
+**Perfil:** usuarios virtuales constantes, con una pausa de 1 segundo por iteración.
+
+| Usuarios virtuales | Solicitudes HTTP | Fallos HTTP | Checks aprobados | Tiempo promedio | p95 | Máximo |
+|---:|---:|---:|---:|---:|---:|---:|
+| 5 | 150 | 0 % | 100 % (300/300) | 0.66 ms | 1.38 ms | 2.19 ms |
+| 20 | 600 | 0 % | 100 % (1200/1200) | 0.77 ms | 1.92 ms | 3.01 ms |
+| 50 | 1.500 | 0 % | 100 % (3000/3000) | 0.78 ms | 3.23 ms | 7.82 ms |
+
+**Archivos de evidencia:**
+
+- `evidencias/03-k6/resultado-health-5vus.json`
+- `evidencias/03-k6/resultado-health-20vus.json`
+- `evidencias/03-k6/resultado-health-50vus.json`
+
+**Interpretación:** el endpoint de salud respondió correctamente en los tres niveles de carga probados. No se registraron fallos HTTP ni verificaciones fallidas.
+
+**Limitación:** estas ejecuciones solo evalúan el endpoint de salud. No incluyen autenticación, consultas a PostgreSQL, vacantes ni operaciones del proceso de matrícula. Por tanto, no demuestran la capacidad del sistema para atender 2.000 usuarios virtuales concurrentes.
+
+El escenario integral de 2.000 VUs y el escenario independiente de integridad de aprobaciones concurrentes permanecen **PENDIENTES / NO EJECUTADOS**.
+

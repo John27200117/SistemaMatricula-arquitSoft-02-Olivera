@@ -1,21 +1,21 @@
 # SDD-F03 — Consulta y gestión de vacantes
 
-**Trazabilidad:** RF02, RF13, RF14; HU02, HU08, HU09. **Clasificación:** SPRINT_2. **Estado:** especificado; implementación pendiente.
+**Trazabilidad:** RF02, RF13, RF14; HU02, HU08, HU09. **Clasificación:** SPRINT_2. **Estado:** consulta de catálogo y vacantes implementada; administración de vacantes pendiente.
 
 ## Objetivo y alcance
 
-Permitir consultar vacantes por grado y sección y permitir al personal autorizado registrar/actualizar su disponibilidad para operar el MVP. No se fijan capacidad, criterios de asignación, fechas ni estructura institucional; estos valores requieren confirmación.
+Permitir consultar vacantes con nombres de nivel, grado, sección y año académico. Las capacidades y registros de vacantes se crean solo cuando estén definidos por la institución.
 
 ## Actores y precondiciones
 
 - Apoderado autenticado consulta vacantes publicadas.
 - Personal administrativo autorizado gestiona vacantes.
-- Una vacante corresponde a la estructura de grado/sección/periodo que se confirme.
+- Una vacante corresponde a una sección de un grado y periodo académico; la FK compuesta conserva la correspondencia entre sección y grado.
 
 ## Flujo principal
 
-1. El usuario solicita vacantes usando filtros disponibles.
-2. El backend obtiene disponibilidad de la base de datos y responde con los campos públicos acordados.
+1. El cliente consulta el catálogo académico y/o las vacantes mediante los endpoints documentados.
+2. El backend devuelve identificadores y nombres legibles de nivel, grado y sección, además del año académico, capacidad y disponibilidad calculada.
 3. El administrador actualiza la capacidad/disponibilidad mediante operación autorizada.
 4. El sistema valida la operación y persiste el cambio.
 5. La caché de consulta, si está habilitada, se invalida o queda sujeta a TTL; no interviene en la decisión final de matrícula.
@@ -43,7 +43,7 @@ Permitir consultar vacantes por grado y sección y permitir al personal autoriza
 
 ## Tareas técnicas
 
-- Confirmar significado y esquema de grado, sección, periodo y capacidad.
+- El catálogo confirmado define 3 niveles y 14 grados; los nombres y registros de secciones continúan pendientes de confirmación.
 - Diseñar restricciones de integridad e índices de búsqueda.
 - Implementar caché de lectura en memoria con TTL configurable e invalidación tras cambios.
 - Implementar aprobación transaccional contra PostgreSQL y probar concurrencia.

@@ -73,6 +73,7 @@ model GuardianStudent {
 
 model AcademicPeriod {
   id              String              @id @default(uuid()) @db.Uuid
+  academicYear    Int                 @map("academic_year")
   vacancies       Vacancy[]
   requirementSets RequirementSet[]
   requests        EnrollmentRequest[]
@@ -125,19 +126,36 @@ model RequirementSetItem {
   @@map("REQUIREMENT_SET_ITEM")
 }
 
-model Grade {
-  id        String    @id @default(uuid()) @db.Uuid
-  sections  Section[]
-  vacancies Vacancy[]
+model EducationLevel {
+  id          String  @id @default(uuid()) @db.Uuid
+  code        String  @unique(map: "education_level_code_uq") @db.Text
+  displayName String  @map("display_name") @db.Text
+  sortOrder   Int     @map("sort_order")
+  grades      Grade[]
 
+  @@map("EDUCATION_LEVEL")
+}
+
+model Grade {
+  id               String         @id @default(uuid()) @db.Uuid
+  educationLevelId String         @map("education_level_id") @db.Uuid
+  displayName      String         @map("display_name") @db.Text
+  sortOrder        Int            @map("sort_order")
+  educationLevel   EducationLevel @relation(fields: [educationLevelId], references: [id], onDelete: Restrict, map: "grade_education_level_fk")
+  sections         Section[]
+  vacancies        Vacancy[]
+
+  @@unique([educationLevelId, displayName], map: "grade_level_name_uq")
+  @@unique([educationLevelId, sortOrder], map: "grade_level_order_uq")
   @@map("GRADE")
 }
 
 model Section {
-  id        String    @id @default(uuid()) @db.Uuid
-  gradeId   String    @map("grade_id") @db.Uuid
-  grade     Grade     @relation(fields: [gradeId], references: [id], onDelete: Restrict, map: "section_grade_fk")
-  vacancies Vacancy[]
+  id          String    @id @default(uuid()) @db.Uuid
+  gradeId     String    @map("grade_id") @db.Uuid
+  displayName String    @map("display_name") @db.Text
+  grade       Grade     @relation(fields: [gradeId], references: [id], onDelete: Restrict, map: "section_grade_fk")
+  vacancies   Vacancy[]
 
   @@unique([id, gradeId], map: "section_id_grade_uq")
   @@map("SECTION")

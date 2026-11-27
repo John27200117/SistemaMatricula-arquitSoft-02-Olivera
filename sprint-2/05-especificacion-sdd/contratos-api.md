@@ -1,6 +1,42 @@
-# Contratos REST previstos — Sprint 2
+# Contratos REST — Sprint 2
 
-**Estado:** contrato de diseño; no implementado ni publicado en Swagger. Los ejemplos son JSON sintácticamente válidos, pero los campos institucionales señalados como pendientes no son DTOs aprobados.
+**Estado general:** IMPLEMENTACIÓN PARCIAL Y CONTRATOS FUTUROS DOCUMENTADOS.
+
+El backend NestJS implementa el prefijo `/api/v1`, expone endpoints funcionales para el módulo de matrícula y dispone de documentación Swagger/OpenAPI.
+
+Este documento distingue entre:
+
+- **Contratos implementados:** endpoints disponibles en el backend y documentados mediante Swagger.
+- **Contratos propuestos:** diseños de endpoints y operaciones futuras que todavía no están implementados ni deben considerarse funcionalidades disponibles.
+
+Los ejemplos JSON de las secciones de diseño son propuestas de contrato y no necesariamente representan los DTO o respuestas actuales del backend.
+
+## 1. Endpoints implementados y estado de publicación
+
+El backend expone los siguientes endpoints:
+
+| Método | Endpoint | Acceso |
+|---|---|---|
+| GET | `/api/v1/health` | Público |
+| GET | `/api/v1/enrollment-types` | Público |
+| GET | `/api/v1/vacancies` | Público |
+| POST | `/api/v1/enrollment-requests` | Protegido |
+| GET | `/api/v1/enrollment-requests` | Protegido |
+| GET | `/api/v1/enrollment-requests/:id` | Protegido |
+| POST | `/api/v1/enrollment-requests/:id/start-review` | Protegido |
+| POST | `/api/v1/enrollment-requests/:id/observe` | Protegido |
+| POST | `/api/v1/enrollment-requests/:id/resubmit` | Protegido |
+| POST | `/api/v1/enrollment-requests/:id/approve` | Protegido |
+| POST | `/api/v1/enrollment-requests/:id/reject` | Protegido |
+
+La documentación Swagger está disponible en:
+
+- Interfaz: `/api/docs`
+- Documento OpenAPI JSON: `/api/docs-json`
+
+Los endpoints protegidos documentan autenticación Bearer. La verificación integral con usuarios reales de Supabase y la autorización efectiva de todos los escenarios todavía requieren pruebas adicionales.
+
+Las rutas propuestas en las secciones siguientes que no coincidan con esta tabla deben entenderse como diseño futuro, no como endpoints actualmente disponibles.
 
 ## Convenciones comunes
 
@@ -115,14 +151,21 @@ Supabase Auth se encarga de inicio/cierre de sesión desde el cliente. El client
 
 ## Vacantes
 
+### `GET /api/v1/academic-catalog`
+
+- **Objetivo/rol:** consultar periodos academicos y estructura de niveles, grados y secciones registradas. Endpoint de solo lectura y sin autenticacion en el MVP actual.
+- **Parametros y cuerpo:** ninguno.
+- **Exito:** `200 OK`.
+- **Respuesta:** `{ "academicPeriods": [{ "id": "<uuid>", "academicYear": 2027 }], "educationLevels": [{ "id": "<uuid>", "code": "INICIAL", "displayName": "Inicial", "sortOrder": 1, "grades": [{ "id": "<uuid>", "displayName": "3 anos", "sortOrder": 1, "sections": [] }] }] }`. Incluye unicamente secciones registradas; la migracion inicial no crea secciones.
+- **Errores/validaciones:** `500` error interno de consulta.
+
 ### `GET /api/v1/vacancies`
 
 - **Objetivo/rol:** consultar disponibilidad; APODERADO y ADMINISTRADOR.
-- **Parámetros:** query opcionales `periodId`, `gradeId`, `sectionId` UUID propuestos; el contrato decidirá filtros obligatorios tras definir el catálogo.
-- **Cuerpo:** ninguno. **Éxito:** `200 OK`.
-- **Respuesta ejemplo:** `{"items":[{"id":"22222222-2222-4222-8222-222222222222","periodId":"33333333-3333-4333-8333-333333333333","gradeId":"44444444-4444-4444-8444-444444444444","sectionId":"55555555-5555-4555-8555-555555555555","capacity":30,"available":4}]}`.
-- **Errores/validaciones:** `400` filtro inválido; `401`; `403`. `available` es dato de consulta y puede venir de caché; jamás se usa para aprobar.
-
+- **Parametros y cuerpo:** ninguno.
+- **Exito:** `200 OK`; devuelve un arreglo, no un objeto `items`.
+- **Respuesta:** cada elemento contiene `id`, `periodId`, `academicYear`, `educationLevelId`, `educationLevelName`, `gradeId`, `gradeName`, `sectionId`, `sectionName`, `capacity`, `occupiedCount`, `availableCount`, `hasAvailability`, `updatedAt` y los nombres obtenidos de relaciones persistidas.
+- **Errores/validaciones:** `500` error interno de consulta. `availableCount` y `hasAvailability` son informativos y no autorizan una aprobacion.
 ### `POST /api/v1/vacancies`
 
 - **Objetivo/rol:** crear capacidad de una oferta; cuenta con rol ADMINISTRADOR y permiso backend explícito para gestionar vacantes. El alcance individual requiere confirmación.
@@ -222,4 +265,4 @@ Supabase Auth se encarga de inicio/cierre de sesión desde el cliente. El client
 - No confiar en `role`, `roles`, `guardianUserId`, `occupiedCount` o propietario enviados por cliente; derivarlos de la identidad verificada y almacenamiento autorizado.
 - Los campos, formatos, tamaños, comentarios, identificadores institucionales y política de duplicidad marcados como pendientes requieren decisión antes de cerrar OpenAPI.
 - Fallos deben usar el esquema uniforme; nunca revelar tokens, stack traces, datos de otro estudiante ni claves de almacenamiento.
-- Las respuestas de ejemplo no sustituyen al esquema OpenAPI. Al implementar NestJS, documentar DTOs, esquema Bearer, tipos, códigos y respuestas con Swagger y validar el documento generado. Swagger todavía no existe.
+- Las respuestas de ejemplo no sustituyen al esquema OpenAPI. Al implementar NestJS, documentar DTOs, esquema Bearer, tipos, códigos y respuestas con Swagger y validar el documento generado. Swagger está implementado y disponible. La documentación OpenAPI se genera desde NestJS. La validación automatizada de todos los contratos y la correspondencia completa entre los ejemplos propuestos y los DTO implementados permanecen pendientes.

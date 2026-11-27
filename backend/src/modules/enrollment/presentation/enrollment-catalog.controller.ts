@@ -14,10 +14,13 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { GetEnrollmentTypesUseCase } from '../application/get-enrollment-types.use-case.js';
+import { GetAcademicCatalogUseCase } from '../application/get-academic-catalog.use-case.js';
 import { GetVacanciesUseCase } from '../application/get-vacancies.use-case.js';
 import { CreateEnrollmentRequestUseCase } from '../application/create-enrollment-request.use-case.js';
 import { GetEnrollmentRequestsUseCase } from '../application/get-enrollment-requests.use-case.js';
 import { CreateEnrollmentRequestDto } from './dto/create-enrollment-request.dto.js';
+import { AcademicCatalogResponseDto } from './dto/academic-catalog-response.dto.js';
+import { VacancyResponseDto } from './dto/vacancy-response.dto.js';
 import { StartReviewUseCase } from '../application/start-review.use-case.js';
 import { ObserveEnrollmentRequestUseCase } from '../application/observe-enrollment-request.use-case.js';
 import { ObserveEnrollmentRequestDto } from './dto/observe-enrollment-request.dto.js';
@@ -39,6 +42,7 @@ import type { AuthenticatedUser } from '../../../shared/infrastructure/auth/auth
 export class EnrollmentCatalogController {
   constructor(
     private readonly getEnrollmentTypes: GetEnrollmentTypesUseCase,
+    private readonly getAcademicCatalog: GetAcademicCatalogUseCase,
     private readonly getVacancies: GetVacanciesUseCase,
     private readonly createEnrollmentRequest: CreateEnrollmentRequestUseCase,
     private readonly getEnrollmentRequests: GetEnrollmentRequestsUseCase,
@@ -57,9 +61,16 @@ export class EnrollmentCatalogController {
     return this.getEnrollmentTypes.execute();
   }
 
+  @Get('academic-catalog')
+  @ApiOperation({ summary: 'Consulta el catálogo de periodos y estructura académica' })
+  @ApiOkResponse({ type: AcademicCatalogResponseDto, description: 'Periodos, niveles, grados y secciones registrados.' })
+  getAcademicCatalogList() {
+    return this.getAcademicCatalog.execute();
+  }
+
   @Get('vacancies')
   @ApiOperation({ summary: 'Consulta las vacantes registradas' })
-  @ApiOkResponse({ description: 'Listado de vacantes y cupos disponibles.' })
+  @ApiOkResponse({ type: VacancyResponseDto, isArray: true, description: 'Listado de vacantes y cupos disponibles.' })
   getVacanciesList() {
     return this.getVacancies.execute();
   }

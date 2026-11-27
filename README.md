@@ -5,7 +5,7 @@ John Anthony Olivera Espinoza
 
 ## Descripción
 Proyecto académico de una aplicación web para gestionar la matrícula
-escolar y la información académica de estudiantes de secundaria.
+escolar y la información académica en los niveles de Inicial, Primaria y Secundaria.
 
 El sistema contempla solicitudes de matrícula, presentación y revisión
 de documentos, gestión de estudiantes, cursos y docentes, registro de
@@ -15,7 +15,7 @@ Se propone incorporar inteligencia artificial como apoyo a la revisión
 documental y a la atención de consultas.
 
 ## Caso de estudio
-Institución Educativa Mariscal Cáceres, Ayacucho.
+I.E.P. Javier Pérez de Cuéllar.
 
 La institución se utiliza como referencia para la propuesta académica.
 Los procesos descritos son supuestos de diseño pendientes de validación.
